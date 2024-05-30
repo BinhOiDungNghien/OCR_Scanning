@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: OCR_SCANNING
+    name: OCR_Scanning
     env: python
     region: oregon
     buildCommand: ""
