@@ -1,2 +1,4 @@
 easyocr
 opencv-python
+uvicorn
+fastapi
