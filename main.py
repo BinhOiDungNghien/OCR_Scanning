@@ -4,6 +4,7 @@ import easyocr
 import os
 import torch
 from typing import List
+import uvicorn
 
 app = FastAPI()
 
@@ -26,7 +27,7 @@ def extract_text_as_lines(reader, image_path, threshold=10):
         
         lines = []
         current_line = []
-        current_y = result[0][0][0][1]  # Initial y position
+        current_y = result[0][0][0][1]
 
         for (bbox, text, prob) in result:
             top_left = bbox[0]
@@ -51,11 +52,9 @@ def extract_text_as_lines(reader, image_path, threshold=10):
         print(f"Error extracting text from image: {e}")
         return []
 
-# Check if GPU is available
 gpu_available = torch.cuda.is_available()
 print(f"GPU available: {gpu_available}")
 
-# Initialize the EasyOCR reader with GPU support if available
 reader = initialize_reader(['en'], gpu=gpu_available)
 
 if reader is None:
@@ -70,7 +69,7 @@ async def extract_text(file: UploadFile = File(...), threshold: int = 10):
         
         lines = extract_text_as_lines(reader, file_location, threshold)
         
-        os.remove(file_location)  # Clean up the file after processing
+        os.remove(file_location)
 
         if not lines:
             return JSONResponse(status_code=200, content={"message": "No text extracted."})
@@ -80,3 +79,6 @@ async def extract_text(file: UploadFile = File(...), threshold: int = 10):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
