@@ -1,7 +1,0 @@
-services:
-  - type: web
-    name: OCR_Scanning
-    env: python
-    region: Singapore (Southeast Asia)
-    buildCommand: ""
-    startCommand: "python app.py"
