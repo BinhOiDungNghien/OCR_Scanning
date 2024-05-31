@@ -1,6 +1,7 @@
 import os
 import torch
 import easyocr
+import tempfile
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -65,10 +66,16 @@ def extract_text():
             return jsonify({"error": "No image file provided"}), 400
 
         image = request.files['image']
-        image_path = os.path.join('/tmp', image.filename)
-        image.save(image_path)
+        
+        # Use tempfile to create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False) as temp:
+            image_path = temp.name
+            image.save(image_path)
 
         lines = extract_text_as_lines(reader, image_path)
+
+        # Remove the temporary file after processing
+        os.remove(image_path)
 
         if lines:
             return jsonify({"lines": lines})
