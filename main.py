@@ -1,9 +1,8 @@
 import os
-import torch
-import pytesseract
 import tempfile
 from flask import Flask, request, jsonify
 from PIL import Image
+import pytesseract
 
 app = Flask(__name__)
 
