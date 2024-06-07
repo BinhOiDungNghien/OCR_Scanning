@@ -1,43 +1,21 @@
 import os
 import torch
-import easyocr
+import pytesseract
 import tempfile
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-def initialize_reader(languages=['en'], gpu=True):
-    try:
-        reader = easyocr.Reader(languages, gpu=gpu)
-        return reader
-    except Exception as e:
-        app.logger.error(f"Error initializing EasyOCR reader: {e}")
-        return None
-
-def extract_text_as_lines(reader, image_path, threshold=10):
+def extract_text_as_lines(image_path, threshold=10):
     try:
         if not os.path.exists(image_path):
             raise FileNotFoundError(f"Image file not found: {image_path}")
 
-        result = reader.readtext(image_path)
-        result.sort(key=lambda x: x[0][0][1])
-
-        lines = []
-        current_line = []
-        current_y = result[0][0][0][1]
-
-        for (bbox, text, prob) in result:
-            top_left = bbox[0]
-            y = top_left[1]
-            if abs(y - current_y) > threshold:
-                lines.append(' '.join(current_line))
-                current_line = [text]
-                current_y = y
-            else:
-                current_line.append(text)
-
-        if current_line:
-            lines.append(' '.join(current_line))
+        image = Image.open(image_path)
+        raw_text = pytesseract.image_to_string(image)
+        
+        # Split the text into lines and filter out empty lines
+        lines = [line for line in raw_text.splitlines() if line.strip()]
 
         return lines
 
@@ -47,13 +25,6 @@ def extract_text_as_lines(reader, image_path, threshold=10):
     except Exception as e:
         app.logger.error(f"Error extracting text from image: {e}")
         return []
-
-# Check if GPU is available
-gpu_available = torch.cuda.is_available()
-app.logger.info(f"GPU available: {gpu_available}")
-
-# Initialize the EasyOCR reader with GPU support if available
-reader = initialize_reader(['en'], gpu=gpu_available)
 
 @app.route('/')
 def home():
