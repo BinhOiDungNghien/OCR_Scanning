@@ -1,4 +1,4 @@
-easyocr
+pytesseract
 opencv-python
 uvicorn
 flask
