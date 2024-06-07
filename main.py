@@ -3,6 +3,7 @@ import torch
 import pytesseract
 import tempfile
 from flask import Flask, request, jsonify
+import Image
 
 app = Flask(__name__)
 
