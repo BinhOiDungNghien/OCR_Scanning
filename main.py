@@ -43,7 +43,7 @@ def extract_text():
             image_path = temp.name
             image.save(image_path)
 
-        lines = extract_text_as_lines(reader, image_path)
+        lines = extract_text_as_lines(image_path)
 
         # Remove the temporary file after processing
         os.remove(image_path)
